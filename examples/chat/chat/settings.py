@@ -72,6 +72,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'chat.wsgi.application'
 ASGI_APPLICATION = 'chat.asgi.application'
 
+# Channel layers are an entirely optional part of Channels.
 # CHANNEL_LAYERS = {}
 
 

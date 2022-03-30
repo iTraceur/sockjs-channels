@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.js"></script>
   <script>
     $(function() {
@@ -16,11 +16,15 @@
       function connect() {
         disconnect();
 
-        var transports = $('#protocols input:checked').map(function(){
-            return $(this).attr('id');
+        var transports = $('#protocols input:checked').map(function() {
+          return $(this).attr('id');
         }).get();
 
-        conn = new SockJS('http://' + window.location.host + '/sockjs/', null, {transports: transports, debug: true});
+        conn = new SockJS(
+          window.location.protocol + '//' + window.location.host + '/sockjs/',
+          null,
+          { transports: transports, debug: true }
+        );
 
         log('Connecting...');
 
@@ -52,13 +56,11 @@
       }
 
       function update_ui() {
-        var msg = '';
-
-        if (conn == null || conn.readyState != SockJS.OPEN) {
+        if (conn == null || conn.readyState !== SockJS.OPEN) {
           $('#status').text('disconnected');
           $('#connect').text('Connect');
         } else {
-          $('#status').text('connected (' + conn.protocol + ')');
+          $('#status').text('connected (' + conn.transport + ')');
           $('#connect').text('Disconnect');
         }
       }
@@ -82,10 +84,10 @@
         return false;
       });
     });
-</script>
+  </script>
 </head>
 <body>
-<h3>Chat!</h3>
+<h3>SockJS Chat!</h3>
 <div id="protocols" style="float: right">
   <ul>
     <li>

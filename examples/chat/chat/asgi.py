@@ -30,9 +30,9 @@ routing.http.append(re_path(r'', django_asgi_app))
 
 application = ProtocolTypeRouter({
     'http': URLRouter([
-        *routing.http,
+        *routing.http
     ]),
     'websocket': URLRouter([
         *routing.websocket
-    ]),
+    ])
 })
