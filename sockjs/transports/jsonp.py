@@ -17,6 +17,7 @@ class JSONPollingConsumer(HttpStreamingConsumer):
         if self.scope["method"] == "GET":
             query_params = http.QueryDict(self.scope.get("query_string", ""))
             callback = self.callback = query_params.get("c", None)
+
             if callback is None:
                 await self.session.remote_closed()
                 raise exceptions.BadRequest('"callback" parameter required')
@@ -35,8 +36,10 @@ class JSONPollingConsumer(HttpStreamingConsumer):
             await self.send_headers(status=200, headers=headers)
 
             await self.handle_session()
+
         elif self.scope["method"] == "POST":
             content_type = dict(self.scope["headers"]).get(b"content-type", b"").decode().lower()
+
             if content_type == "application/x-www-form-urlencoded":
                 if not body.startswith(b"d="):
                     raise exceptions.BadRequest("Payload expected.")
@@ -59,18 +62,22 @@ class JSONPollingConsumer(HttpStreamingConsumer):
                 b"Connection": b"keep-alive",
             }
             headers.update(session_cookie(self.scope))
+
             await self.send_headers(status=200, headers=headers)
 
             await self.session.remote_messages(messages)
 
             await self.send_message("ok")
+
         else:
             headers = {
                 b"Connection": b"close",
                 b"Access-Control-Allow-Methods": b"GET,POST",
                 b"Content-Type": b"text/plain; charset=UTF-8",
             }
+
             msg = "No support for such method:{%s}" % self.scope["method"]
+
             return await self.send_response(400, msg.encode("utf-8"), headers=headers)
 
     async def send_message(self, payload, *, more_body=False):

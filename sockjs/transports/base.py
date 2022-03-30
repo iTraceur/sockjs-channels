@@ -66,7 +66,7 @@ class IframeConsumer(AsyncHttpConsumer):
 
     async def handle(self, body):
         headers = dict(self.scope["headers"])
-        cached = headers.get(b"IF-NONE-MATCH", None)
+        cached = headers.get(b"if-none-match", None)
         if cached:
             headers = {b"Content-Type": b""}
             headers.update(cache_headers())
@@ -100,6 +100,7 @@ class BaseWebsocketConsumer(AsyncWebsocketConsumer):
 
 
 class HttpStreamingConsumer(AsyncHttpConsumer):
+    size = 0  # bytes has sent
     maxsize = 131072  # 128K bytes
     timeout = None  # timeout to wait for message
 
@@ -116,7 +117,6 @@ class HttpStreamingConsumer(AsyncHttpConsumer):
         self.manager = manager
         self.session = session
         self.create = create
-        self.size = 0
 
     async def handle(self, body):
         raise NotImplementedError(
@@ -129,6 +129,8 @@ class HttpStreamingConsumer(AsyncHttpConsumer):
         if not message.get("more_body"):
             try:
                 await self.handle(b"".join(self.body))
+            except asyncio.CancelledError:
+                raise
             except BaseException as exc:
                 await self.handle_exception(exc)
 
@@ -186,7 +188,7 @@ class HttpStreamingConsumer(AsyncHttpConsumer):
                         break
         except SessionIsClosed:
             pass
-        except (asyncio.CancelledError, StopConsumer) as exc:
+        except asyncio.CancelledError as exc:
             await self.session.remote_close(exc=exc)
             await self.session.remote_closed()
             raise

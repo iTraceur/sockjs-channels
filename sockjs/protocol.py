@@ -45,7 +45,6 @@ except ImportError:  # pragma: no cover
                 now[5],
             )
 
-
     dumps_kwargs = {"default": datetime_handler, "separators": (",", ":")}
 
     # Faster
@@ -65,6 +64,21 @@ FRAME_MESSAGE_BLOB = "a1"
 FRAME_HEARTBEAT = "h"
 
 # ------------------
+
+HTMLFILE_HTML = """
+<!doctype html>
+<html><head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><h2>Don't panic!</h2>
+  <script>
+    document.domain = document.domain;
+    var c = parent.%s;
+    c.start();
+    function p(d) {c.message(d);};
+    window.onload = function() {c.stop();};
+  </script>
+""".strip()
 
 IFRAME_HTML = """<!DOCTYPE html>
 <html>

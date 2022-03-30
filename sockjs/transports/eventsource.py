@@ -3,12 +3,6 @@ from .utils import CACHE_CONTROL, session_cookie
 
 
 class EventsourceConsumer(HttpStreamingConsumer):
-    maxsize = 131072  # 128K bytes
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.size = 0
-
     async def handle(self, body):
         headers = {
             b"Connection": b"keep-alive",
@@ -16,6 +10,7 @@ class EventsourceConsumer(HttpStreamingConsumer):
             b"Cache-Control": CACHE_CONTROL,
         }
         headers.update(session_cookie(self.scope))
+
         await self.send_headers(status=200, headers=headers)
 
         await self.send_body(b"\r\n", more_body=True)

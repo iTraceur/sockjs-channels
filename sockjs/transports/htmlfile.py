@@ -6,34 +6,16 @@ from django.core import exceptions
 
 from .base import HttpStreamingConsumer
 from .utils import CACHE_CONTROL, session_cookie, cors_headers
-
-PRELUDE1 = """<!doctype html>
-<html><head>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-</head><body><h2>Don"t panic!</h2>
-  <script>
-    document.domain = document.domain;
-    var c = parent."""
-
-PRELUDE2 = """;
-    c.start();
-    function p(d) {c.message(d);};
-    window.onload = function() {c.stop();};
-  </script>"""
+from ..protocol import HTMLFILE_HTML
 
 
 class HTMLFileConsumer(HttpStreamingConsumer):
-    maxsize = 131072  # 128K bytes
     check_callback = re.compile(r"^[a-zA-Z0-9_.]+$")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.size = 0
 
     async def handle(self, body):
         query_params = http.QueryDict(self.scope.get("query_string", ""))
         callback = query_params.get("c", None)
+
         if callback is None:
             await self.session.remote_closed()
             raise exceptions.BadRequest('"callback" parameter required')
@@ -51,7 +33,7 @@ class HTMLFileConsumer(HttpStreamingConsumer):
 
         await self.send_headers(status=200, headers=headers)
 
-        await self.send_body("".join((PRELUDE1, callback, PRELUDE2)).encode("utf-8"), more_body=True)
+        await self.send_body((HTMLFILE_HTML % callback).encode("utf-8"), more_body=True)
 
         await self.handle_session()
 

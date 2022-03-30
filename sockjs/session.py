@@ -223,8 +223,8 @@ class Session(object):
 
         try:
             await self.handler(SockjsMessage(MSG_MESSAGE, message), self)
-        except:
-            logger.exception("Exception in message handler.")
+        except Exception as exc:
+            logger.exception("Exception in message handler, %s." % str(exc))
 
     async def remote_messages(self, messages):
         self._tick()
@@ -233,8 +233,8 @@ class Session(object):
             logger.debug("incoming message: %s, %s", self.id, message[:200])
             try:
                 await self.handler(SockjsMessage(MSG_MESSAGE, message), self)
-            except:
-                logger.exception("Exception in message handler.")
+            except Exception as exc:
+                logger.exception("Exception in message handler, %s." % str(exc))
 
     async def remote_close(self, exc=None):
         """close session from remote."""
@@ -248,8 +248,8 @@ class Session(object):
             self.interrupted = True
         try:
             await self.handler(SockjsMessage(MSG_CLOSE, exc), self)
-        except:
-            logger.exception("Exception in close handler.")
+        except Exception as exc:
+            logger.exception("Exception in close handler, %s." % str(exc))
 
         self.stop_heartbeat()
 
@@ -262,8 +262,8 @@ class Session(object):
         self.expire()
         try:
             await self.handler(ClosedMessage, self)
-        except:
-            logger.exception("Exception in closed handler.")
+        except Exception as exc:
+            logger.exception("Exception in closed handler, %s." % str(exc))
 
         # notify waiter
         self.notify_waiter()
@@ -343,7 +343,7 @@ class SessionManager(dict):
                 session = self._sessions[idx]
 
                 if session.expires < now or session.expired:
-                    # Session is to be GC"d immedietely
+                    # Session is to be GC"d immediately
                     if session.id in self._acquired_map:
                         await self.release(session)
                     if session.state == STATE_OPEN:
@@ -363,7 +363,7 @@ class SessionManager(dict):
 
     def _add(self, session):
         if session.expired:
-            raise ValueError("Can not add expired session")
+            raise ValueError("Can not add expired session.")
 
         session.manager = self
 

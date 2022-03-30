@@ -71,11 +71,11 @@ def add_endpoint(
                                  debug=debug)
 
     if manager.name != name:
-        raise ValueError("Session manage must have same name as sockjs route")
+        raise ValueError("Session manage must have same name as sockjs route.")
 
     managers = routing.config.setdefault("__sockjs_managers__", {})
     if name in managers:
-        raise ValueError('SockJS "%s" route already registered' % name)
+        raise ValueError('SockJS "%s" route already registered.' % name)
 
     managers[name] = manager
 

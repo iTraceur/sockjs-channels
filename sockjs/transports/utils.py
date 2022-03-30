@@ -6,13 +6,13 @@ CACHE_CONTROL = b"no-store, no-cache, no-transform, must-revalidate, max-age=0"
 
 def cors_headers(headers, force=False):
     headers = dict(headers)
-    origin = headers.get(b"Origin", b"*")
+    origin = headers.get(b"origin", b"*")
     if force:
         origin = b"*"
 
     cors = {b"Access-Control-Allow-Origin": origin}
 
-    ac_headers = headers.get(b"Access-Control-Request-Headers")
+    ac_headers = headers.get(b"access-control-request-headers")
     if ac_headers:
         cors[b"Access-Control-Allow-Headers"] = ac_headers
 

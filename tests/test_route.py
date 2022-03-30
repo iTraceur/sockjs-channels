@@ -49,7 +49,7 @@ class RouteTests(TestCase):
     async def test_iframe(self):
         communicator = HttpCommunicator(make_application(), "GET", "/sockjs/iframe.html")
         response = await communicator.get_response()
-        sockjs_cdn = "https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.js"
+        sockjs_cdn = "https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"
         text = """<!DOCTYPE html>
 <html>
 <head>
@@ -72,7 +72,7 @@ class RouteTests(TestCase):
 
     async def test_iframe_cache(self):
         communicator = HttpCommunicator(make_application(), "GET", "/sockjs/iframe.html",
-                                        headers=[(b"IF-NONE-MATCH", b"test")])
+                                        headers=[(b"if-none-match", b"test")])
         response = await communicator.get_response()
 
         self.assertEqual(response["status"], 304)

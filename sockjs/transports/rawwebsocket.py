@@ -30,7 +30,6 @@ class RawWebsocketConsumer(BaseWebsocketConsumer):
         self.session_loop_task = asyncio.ensure_future(self.session_loop())
 
     async def session_loop(self):
-
         try:
             while True:
                 try:
