@@ -1,11 +1,11 @@
 [run]
 branch = True
 source = sockjs
-omit = tests/*, examples/*, setup.py
+omit = tests/*, examples/*, setup.py, sockjs/__version__.py
 
 [report]
 show_missing = True
-skip_covered = True
+skip_covered = False
 
 [html]
 directory = coverage_html

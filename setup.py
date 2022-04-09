@@ -1,35 +1,46 @@
-import os
+import re
+from pathlib import Path
 
 from setuptools import find_packages, setup
 
-base_dir = os.path.abspath(os.path.dirname(__file__))
 
-about = {}
+def read(filepath):
+    with open(filepath, "r", encoding="utf-8") as f:
+        return f.read().strip()
 
-with open(os.path.join(base_dir, 'sockjs', '__version__.py'), 'r', encoding='utf-8') as f:
-    exec(f.read(), about)
 
-with open('README.md', 'r', encoding='utf-8') as f:
-    readme = f.read()
+def get_version():
+    init_py = Path("sockjs/__init__.py").read_text()
+    return re.search(r"__version__\W*=\W*['\"]([[\d.]+)['\"]", init_py).group(1)
 
-with open('requirements.txt', 'r', encoding='utf-8') as f:
-    requirements = [line.strip() for line in f.read().splitlines() if not line.startswith('#')]
+
+def get_requirements():
+    return [line.strip() for line in read("requirements.txt").splitlines() if not line.startswith("#")]
+
+
+def get_long_description():
+    readme = read('README.md')
+    try:
+        return "\n\n".join((read("README.md"), read("CHANGELOG.md")))
+    except IOError:
+        return readme
+
 
 setup(
-    name=about['__title__'],
-    version=about['__version__'],
-    description=about['__description__'],
-    author=about['__author__'],
-    author_email=about['__author_email__'],
-    url=about['__url__'],
-    license=about['__license__'],
-    long_description=readme,
+    name="sockjs-channels",
+    version=get_version(),
+    url="https://github.com/iTraceur/sockjs-channels",
+    author="iTraceur",
+    author_email="iTraceur.cn@gmail.com",
+    description="WebSocket emulation - SockJS server implementation for Django Channels.",
+    long_description=get_long_description(),
     long_description_content_type="text/markdown",
+    license="MIT License",
     packages=find_packages(exclude=["tests"]),
     include_package_data=True,
     requires=["channels", "django"],
     python_requires=">=3.6.0",
-    install_requires=requirements,
+    install_requires=get_requirements(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
