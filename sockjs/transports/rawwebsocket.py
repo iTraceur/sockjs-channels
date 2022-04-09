@@ -2,7 +2,7 @@ import asyncio
 
 from .base import BaseWebsocketConsumer
 from ..exceptions import SessionIsClosed
-from ..protocol import FRAME_CLOSE, FRAME_MESSAGE, FRAME_MESSAGE_BLOB
+from ..protocol import FRAME_CLOSE, FRAME_MESSAGE, FRAME_MESSAGE_BLOB, loads
 
 
 class RawWebsocketConsumer(BaseWebsocketConsumer):
@@ -14,16 +14,18 @@ class RawWebsocketConsumer(BaseWebsocketConsumer):
         await self.handle_session()
 
     async def receive(self, text_data=None, bytes_data=None):
-        if not text_data:
+        if not text_data and not bytes_data:
             return
 
-        await self.session.remote_message(text_data)
+        payload = text_data or bytes_data.decode("utf-8")
+        await self.session.remote_message(payload)
 
     async def handle_session(self):
         try:
             await self.manager.acquire(self.scope, self.session)
         except Exception as exc:
-            await self.session.remote_close(str(exc))
+            await self.session.remote_close(exc=exc)
+            await self.session.remote_closed()
             await self.close(code=3000)
             return
 
@@ -41,25 +43,23 @@ class RawWebsocketConsumer(BaseWebsocketConsumer):
                     for data in payload:
                         await self.send(data)
                 elif frame == FRAME_MESSAGE_BLOB:
-                    payload = payload[1:]
-                    if payload.startswith("["):
-                        payload = payload[1:-1]
-
-                    await self.send(payload)
+                    payload = loads(payload[1:])
+                    for data in payload:
+                        await self.send(data)
                 elif frame == FRAME_CLOSE:
                     try:
                         await self.close(code=3000)
                     finally:
                         await self.session.remote_closed()
-        except asyncio.CancelledError:
-            raise
         except BaseException as exc:
-            await self.session.remote_close(str(exc))
+            await self.session.remote_close(exc=exc)
+            await self.session.remote_closed()
         finally:
             await self.manager.release(self.session)
 
     async def disconnect(self, code):
         await self.session.remote_closed()
+        await self.manager.release(self.session)
 
         if self.session_loop_task is not None:
             self.session_loop_task.cancel()
