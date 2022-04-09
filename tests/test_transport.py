@@ -93,6 +93,17 @@ class TestTransport(TestCase):
 
         await transport.manager.clear()
 
+    async def test_connection_still_open(self):
+        transport = make_http_transport()
+        send = transport.send_body = make_mocked_coroutine(None)
+        transport.session.interrupted = False
+        transport.session.state = protocol.STATE_NEW
+        await transport.manager.acquire(transport.scope, transport.session)
+        await transport.handle_session()
+        send.assert_called_with(b'c[2010,"Another connection still open"]\n', more_body=False)
+
+        await transport.manager.clear()
+
     async def test_http_session_has_scope(self):
         path = "/sockjs/000/000000/test"
         scope = make_scope("POST", path)

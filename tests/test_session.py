@@ -122,13 +122,13 @@ class TestSession(TestCase):
 
     async def test_send_frame(self):
         session = make_session()
-        session.send_frame('a["message"]')
 
+        session.send_frame('a["message"]')
         self.assertEqual(list(session._queue), [])
 
         session.state = protocol.STATE_OPEN
-        session.send_frame('a["message"]')
 
+        session.send_frame('a["message"]')
         self.assertEqual(list(session._queue), [(protocol.FRAME_MESSAGE_BLOB, 'a["message"]')])
 
     async def test_feed(self):
@@ -251,7 +251,7 @@ class TestSession(TestCase):
         self.assertEqual(messages, [(protocol.OpenMessage, session)])
 
     async def test_acquire_exception_in_handler(self):
-        async def handler(scope, msg, s):
+        async def handler(msg, s):
             raise ValueError
 
         session = make_session(handler=handler)
