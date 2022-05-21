@@ -98,7 +98,7 @@ class TestTransport(TestCase):
         send = transport.send_body = make_mocked_coroutine(None)
         transport.session.interrupted = False
         transport.session.state = protocol.STATE_NEW
-        await transport.manager.acquire(transport.scope, transport.session)
+        await transport.manager.acquire(transport.session)
         await transport.handle_session()
         send.assert_called_with(b'c[2010,"Another connection still open"]\n', more_body=False)
 

@@ -89,9 +89,8 @@ class Session(object):
         else:
             self.expires = datetime.now() + timeout
 
-    async def acquire(self, scope, manager, heartbeat=True):
+    async def acquire(self, manager, heartbeat=True):
         self.acquired = True
-        self.scope = scope
         self.manager = manager
         self._heartbeat_consumer = heartbeat
 
@@ -383,10 +382,12 @@ class SessionManager(dict):
                 if default is not empty:
                     return default
                 raise KeyError(sid)
+        else:
+            session.scope = scope
 
         return session
 
-    async def acquire(self, scope, session):
+    async def acquire(self, session):
         sid = session.id
 
         if sid in self._acquired_map:
@@ -394,7 +395,7 @@ class SessionManager(dict):
         if sid not in self:
             raise KeyError("Unknown session")
 
-        await session.acquire(scope, self)
+        await session.acquire(self)
 
         self._acquired_map[sid] = True
         return session

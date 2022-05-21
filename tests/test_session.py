@@ -243,7 +243,7 @@ class TestSession(TestCase):
         self.assertEqual(session.state, protocol.STATE_NEW)
 
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        await session.acquire(scope, manager)
+        await session.acquire(manager)
         self.assertEqual(session.state, protocol.STATE_OPEN)
         self.assertIs(session.manager, manager)
         self.assertTrue(session._heartbeat_consumer)
@@ -258,7 +258,7 @@ class TestSession(TestCase):
         self.assertEqual(session.state, protocol.STATE_NEW)
 
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        await session.acquire(scope, object())
+        await session.acquire(object())
         self.assertEqual(session.state, protocol.STATE_CLOSING)
         self.assertTrue(session._heartbeat_consumer)
         self.assertTrue(session.interrupted)
@@ -454,7 +454,7 @@ class TestSessionManager(TestCase):
         s1.acquire.return_value.set_result(1)
 
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        s2 = await sm.acquire(scope, s1)
+        s2 = await sm.acquire(s1)
 
         self.assertIs(s1, s2)
         self.assertIn(s1.id, sm._acquired_map)
@@ -469,7 +469,7 @@ class TestSessionManager(TestCase):
         session = make_session()
         scope = make_scope("GET", path="/sockjs/000/000000/test")
         with self.assertRaises(KeyError):
-            await sm.acquire(scope, session)
+            await sm.acquire(session)
 
         await sm.clear()
 
@@ -478,10 +478,10 @@ class TestSessionManager(TestCase):
         session = make_session()
         sm._add(session)
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        await sm.acquire(scope, session)
+        await sm.acquire(session)
 
         with self.assertRaises(SessionIsAcquired):
-            await sm.acquire(scope, session)
+            await sm.acquire(session)
 
         await sm.clear()
 
@@ -491,7 +491,7 @@ class TestSessionManager(TestCase):
         session.release = mock.Mock()
 
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        await sm.acquire(scope, session)
+        await sm.acquire(session)
         await sm.release(session)
 
         self.assertNotIn("test", sm._acquired_map)
@@ -583,7 +583,7 @@ class TestSessionManager(TestCase):
 
         sm._add(session)
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        await sm.acquire(scope, session)
+        await sm.acquire(session)
         await sm.release(session)
 
         session.expires = datetime.now() - timedelta(seconds=30)
@@ -600,7 +600,7 @@ class TestSessionManager(TestCase):
         session = make_session()
         sm._add(session)
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        await sm.acquire(scope, session)
+        await sm.acquire(session)
         session.expires = datetime.now() - timedelta(seconds=30)
         await sm._gc_task()
 
@@ -619,8 +619,8 @@ class TestSessionManager(TestCase):
         sm._add(s1)
         sm._add(s2)
         scope = make_scope("GET", path="/sockjs/000/000000/test")
-        await sm.acquire(scope, s1)
-        await sm.acquire(scope, s2)
+        await sm.acquire(s1)
+        await sm.acquire(s2)
         await sm.release(s1)
         await sm.release(s2)
 

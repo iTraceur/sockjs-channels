@@ -35,7 +35,7 @@ class WebsocketConsumer(BaseWebsocketConsumer):
             return
 
         try:
-            await self.manager.acquire(self.scope, self.session)
+            await self.manager.acquire(self.session)
         except SessionIsAcquired:
             await self.send(close_frame(2010, "Another connection still open"))
             return

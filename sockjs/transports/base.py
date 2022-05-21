@@ -163,7 +163,7 @@ class HttpStreamingConsumer(AsyncHttpConsumer):
 
         # acquire session
         try:
-            await self.manager.acquire(self.scope, self.session)
+            await self.manager.acquire(self.session)
         except SessionIsAcquired:
             await self.send_message(close_frame(2010, "Another connection still open"))
             return

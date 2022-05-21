@@ -22,7 +22,7 @@ class RawWebsocketConsumer(BaseWebsocketConsumer):
 
     async def handle_session(self):
         try:
-            await self.manager.acquire(self.scope, self.session)
+            await self.manager.acquire(self.session)
         except Exception as exc:
             await self.session.remote_close(exc=exc)
             await self.session.remote_closed()
