@@ -56,10 +56,7 @@ class WebsocketConsumer(BaseWebsocketConsumer):
                 except SessionIsClosed:
                     break
 
-                try:
-                    await self.send(payload)
-                except OSError:
-                    pass  # ignore "cannot write to closed consumer"
+                await self.send(payload)
 
                 if frame == FRAME_CLOSE:
                     try:

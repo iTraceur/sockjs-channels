@@ -181,7 +181,7 @@ class HttpStreamingConsumer(AsyncHttpConsumer):
                 if frame == FRAME_CLOSE:
                     await self.session.remote_closed()
                     await self.send_message(payload)
-                    return
+                    break
                 else:
                     stop = await self.send_message(payload, more_body=True)
                     if stop:

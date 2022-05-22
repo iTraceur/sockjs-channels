@@ -94,7 +94,6 @@ class Session(object):
         self.manager = manager
         self._heartbeat_consumer = heartbeat
 
-        self._tick()
         self._hits += 1
 
         if self.state == STATE_NEW:
@@ -146,7 +145,6 @@ class Session(object):
         self._heartbeat_timer = loop.call_later(self.heartbeat_interval, self._heartbeat)
 
     def _feed(self, frame, data):
-        # pack messages
         if frame == FRAME_MESSAGE:
             if self._queue and self._queue[-1][0] == FRAME_MESSAGE:
                 self._queue[-1][1].append(data)
@@ -170,6 +168,8 @@ class Session(object):
 
             if frame == FRAME_HEARTBEAT:
                 self._heartbeat_consumed = True
+            else:
+                self._tick()
 
             if pack:
                 if frame == FRAME_CLOSE:
