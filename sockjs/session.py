@@ -342,13 +342,15 @@ class SessionManager(dict):
                 session = self._sessions[idx]
 
                 if session.expires < now or session.expired:
+                    session._feed(FRAME_CLOSE, (3000, "Session timeout!"))
+
                     # Session is to be GC"d immediately
-                    if session.id in self._acquired_map:
-                        await self.release(session)
                     if session.state == STATE_OPEN:
                         await session.remote_close()
                     if session.state == STATE_CLOSING:
                         await session.remote_closed()
+                    if session.id in self._acquired_map:
+                        await self.release(session)
 
                     del self[session.id]
                     del self._sessions[idx]
